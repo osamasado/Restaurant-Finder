@@ -39,11 +39,8 @@ below) — most other domain code is still to be built.
 - `GET /api/restaurants/nearby?lat={lat}&lon={lon}&radius={m}` — Geoapify Places query
   (`categories=catering.restaurant`) within `radius` meters of the given point. Backs the
   "use my current location" flow (browser Geolocation API gives lat/lon directly to the
-  frontend, which calls this endpoint).
-  - **Current status:** `RestaurantService.getRestaurants(lon, lat, radiusMeters)` implements
-    this call against Geoapify, but `RestaurantController` (mapped at `/api/restaurant`) doesn't
-    yet expose a method calling it — still needs a `@GetMapping` wired up (and its path aligned
-    to `/api/restaurants/nearby` per this doc, or this doc updated to match the chosen path).
+  frontend, which calls this endpoint). **Implemented** — `RestaurantController.getNearbyRestaurants`
+  calls `RestaurantService.getRestaurants(lon, lat, radius)`; `radius` defaults to 2000m.
 - `GET /api/restaurants/search?address={text}&radius={m}` — geocode `address` via the Geoapify
   Geocoding API, then run the same nearby search from the resolved coordinates. Backs the
   home-page search field. **Not implemented yet.**
