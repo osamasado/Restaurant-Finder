@@ -1,0 +1,15 @@
+#general
+.idea
+*.iml
+
+#backend
+/backend/.mvn
+/backend/mvnw
+/backend/mvnw.cmd
+
+#frontend
+frontend/node_modules
+frontend/dist
+frontend/dist-ssr
+frontend/npm-debug.log*
+frontend/.local
