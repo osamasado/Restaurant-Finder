@@ -6,6 +6,7 @@
 /backend/.mvn
 /backend/mvnw
 /backend/mvnw.cmd
+/backend/target
 
 #frontend
 frontend/node_modules

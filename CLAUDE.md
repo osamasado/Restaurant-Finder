@@ -10,40 +10,51 @@ Two independently built/run modules, not a monorepo-tooled workspace:
 - `frontend/` — React 19 + TypeScript, Vite. `vite.config.ts` proxies `/api/*` to
   `http://localhost:8080`, so the backend must expose all endpoints under `/api`.
 
-Both are early-stage scaffolds (Spring Initializr / `npm create vite`) — no domain code exists
-yet beyond generator defaults.
+The frontend is still an unmodified Vite/React template. The backend has an initial
+`RestaurantService`/`RestaurantController`/`Restaurant` slice wired to Geoapify (see Architecture
+below) — most other domain code is still to be built.
 
 ## Tech stack decisions (already made — don't re-litigate without discussion)
 
-- **Restaurant data:** OpenStreetMap Overpass API (search by radius) + Nominatim (geocode a typed
-  address to coordinates). Free, no API key. Trade-off: no ratings/reviews/photos in the data.
-- **Map:** Leaflet via `react-leaflet`, OSM tile layer.
-- **Persistence:** none for v1. The backend is a stateless proxy/aggregator over the OSM APIs —
-  do not introduce a database, JPA, or entities without discussing it first.
-- **Backend HTTP client:** Spring `RestClient` (built-in, no extra dependency) to call Nominatim
-  and Overpass.
+- **Restaurant data:** Geoapify Places API (search by radius) + Geoapify Geocoding API (geocode a
+  typed address to coordinates) — a paid-tier-capable provider wrapping OpenStreetMap data behind
+  one API and one API key. Requires an `API_KEY` env var (see `application.properties`:
+  `geoapify.app.key=${API_KEY}`). Free tier: 3,000 requests/day. Trade-off: no ratings/reviews/
+  photos in the data. (Originally planned as raw Nominatim + Overpass calls — switched to
+  Geoapify to get both geocoding and places search behind one authenticated API.)
+- **Map:** Leaflet via `react-leaflet`, OSM tile layer (independent of the Geoapify choice above).
+- **Persistence:** none for v1. The backend is a stateless proxy/aggregator over the Geoapify
+  API — do not introduce a database, JPA, or entities without discussing it first.
+- **Backend HTTP client:** Spring `RestClient` (built-in, no extra dependency) to call Geoapify.
 - **Backend caching:** `spring-boot-starter-cache` + Caffeine, in-memory only — used to avoid
-  re-hitting OSM APIs on repeated searches, not as a data store.
+  re-hitting Geoapify on repeated searches and to help stay within the free-tier daily quota, not
+  as a data store.
 - **Frontend styling:** Tailwind CSS — prefer utility classes over custom CSS files.
 - **Frontend server state:** `@tanstack/react-query` for API calls (loading/error/caching), not
   raw `useEffect` + `useState` fetch logic.
 
 ## Architecture
 
-**Endpoints:**
-- `GET /api/restaurants/nearby?lat={lat}&lon={lon}&radius={m}` — Overpass query for
-  `amenity=restaurant` (and similar tags) within `radius` meters of the given point. Backs the
+**Endpoints (target design):**
+- `GET /api/restaurants/nearby?lat={lat}&lon={lon}&radius={m}` — Geoapify Places query
+  (`categories=catering.restaurant`) within `radius` meters of the given point. Backs the
   "use my current location" flow (browser Geolocation API gives lat/lon directly to the
   frontend, which calls this endpoint).
-- `GET /api/restaurants/search?address={text}&radius={m}` — geocode `address` via Nominatim,
-  then run the same nearby search from the resolved coordinates. Backs the home-page search
-  field.
+  - **Current status:** `RestaurantService.getRestaurants(lon, lat, radiusMeters)` implements
+    this call against Geoapify, but `RestaurantController` (mapped at `/api/restaurant`) doesn't
+    yet expose a method calling it — still needs a `@GetMapping` wired up (and its path aligned
+    to `/api/restaurants/nearby` per this doc, or this doc updated to match the chosen path).
+- `GET /api/restaurants/search?address={text}&radius={m}` — geocode `address` via the Geoapify
+  Geocoding API, then run the same nearby search from the resolved coordinates. Backs the
+  home-page search field. **Not implemented yet.**
 
-**Backend layering:** Controller → Service (orchestrates geocode + search + distance sort) →
-`NominatimClient` / `OverpassClient` (thin `RestClient` wrappers) → DTOs (`RestaurantDto`,
-`SearchRequest`) with a mapper. DTOs cross layer boundaries, not raw external API response
-shapes. Distance is computed server-side with the Haversine formula and results are sorted
-nearest-first.
+**Backend layering:** Controller → Service (orchestrates geocode + search + distance sort where
+applicable) → thin `RestClient`-based calls to Geoapify → response DTOs
+(`GeoapifyPlacesResponse` and friends) mapped to the domain `Restaurant` record. Domain records
+cross layer boundaries, not raw external API response shapes — see
+`model/GeoapifyPlacesResponse.java` for the Geoapify response shape and
+`RestaurantService.toRestaurant()` for the mapping. Distance/nearest-first sorting is not yet
+implemented (Geoapify's `bias=proximity` biases results but doesn't guarantee a sorted response).
 
 **Frontend flow:** Home page requests browser Geolocation API on load → calls
 `/api/restaurants/nearby` → renders results as cards + a Leaflet map. The search field submits an
@@ -52,12 +63,14 @@ location.
 
 ## External API constraints (must respect)
 
-- **Nominatim:** max 1 request/second, requires a descriptive `User-Agent` header on every
-  request (not the default HTTP client one) — set this in the `RestClient` config, not per call.
-- **Overpass:** has fair-use rate/timeout limits; keep queries scoped (bounded radius) and cache
-  responses rather than re-querying on every render.
+- **Geoapify:** free tier caps at 3,000 requests/day across all endpoints (Places + Geocoding
+  share the quota) — cache responses (`spring-boot-starter-cache` + Caffeine) rather than
+  re-querying on every render, and don't add features that call it in a loop.
+- **API key:** never hardcode it — it's injected via constructor `@Value("${geoapify.app.key}")`
+  in `RestaurantService`, sourced from the `API_KEY` env var. Don't log the key or include it in
+  error messages that could reach the frontend.
 - **Attribution:** OpenStreetMap requires "© OpenStreetMap contributors" to be visible in the UI
-  (Leaflet's default tile attribution control satisfies this — don't remove it).
+  for the map (Leaflet's default tile attribution control satisfies this — don't remove it).
 
 ## Conventions
 

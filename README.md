@@ -9,10 +9,11 @@ home page to see restaurants around that location instead.
 **Backend** — Java 25, Spring Boot, Maven, Lombok
 - `spring-boot-starter-web` — REST API
 - `spring-boot-starter-validation` — request validation
-- Spring `RestClient` — calls out to OpenStreetMap's Nominatim (geocoding) and Overpass
-  (restaurant search) APIs
+- Spring `RestClient` — calls out to the Geoapify Places API (restaurant search) and Geoapify
+  Geocoding API (address search)
 - `spring-boot-starter-cache` + Caffeine — in-memory response caching (no database; keeps the
-  backend a stateless proxy/aggregator over OSM data and respects Nominatim's rate limits)
+  backend a stateless proxy/aggregator over Geoapify and helps stay within its free-tier request
+  quota)
 - `springdoc-openapi` — Swagger UI / OpenAPI docs
 - JUnit 5, Mockito, MockMvc — testing
 
@@ -25,10 +26,13 @@ home page to see restaurants around that location instead.
 - `lucide-react` — icons
 - Vitest + React Testing Library — testing
 
-**Why OpenStreetMap?** Nominatim (geocoding) and Overpass (restaurant search) are free and
-require no API key, which keeps the project runnable by anyone without signing up for a paid
-map/places provider. The trade-off: OSM has no star ratings, reviews, or photos — restaurant
-cards show name, cuisine/type, address, distance, and opening hours (when tagged), not ratings.
+**Why Geoapify?** Geoapify wraps OpenStreetMap place data behind a single Places + Geocoding API
+with a generous free tier (3,000 requests/day), including contact details (phone/email) alongside
+each place — unlike calling Nominatim/Overpass directly, it needs no per-service rate-limit
+handling on our side. The trade-off: it requires a free API key (sign up at
+[geoapify.com](https://www.geoapify.com/)) and still has no star ratings, reviews, or photos —
+restaurant cards show name, address, phone, and email (when available), not ratings. Map tiles
+remain OpenStreetMap-based via Leaflet.
 
 ## Project structure
 
@@ -43,14 +47,17 @@ Restaurant-Finder/
 - JDK 25
 - Node.js (LTS) and npm
 - Maven is not required to be installed globally — use the included wrapper (`./mvnw`)
+- A free [Geoapify](https://www.geoapify.com/) API key
 
 ## Running the app
 
 **Backend** (from `backend/`):
 ```bash
+export API_KEY=your-geoapify-api-key
 ./mvnw spring-boot:run
 ```
-Starts on `http://localhost:8080`.
+Starts on `http://localhost:8080`. The key is read via `geoapify.app.key=${API_KEY}` in
+`application.properties`.
 
 **Frontend** (from `frontend/`):
 ```bash
@@ -69,9 +76,10 @@ backend on port 8080 (see `frontend/vite.config.ts`).
 
 ## Known limitations
 
-- No ratings, reviews, or photos — OpenStreetMap doesn't provide them.
-- Nominatim's usage policy caps requests to 1/second and requires a descriptive `User-Agent`;
-  heavy or rapid searching may be throttled. The backend caches responses to help stay within
-  this limit.
-- Map tiles and search results require attribution to OpenStreetMap contributors, shown in the
-  app's map/footer.
+- No ratings, reviews, or photos — Geoapify's place data doesn't provide them.
+- Geoapify's free tier caps requests at 3,000/day; the backend caches responses to help stay
+  within this limit.
+- Map tiles are OpenStreetMap-based (via Leaflet) and require attribution to OpenStreetMap
+  contributors, shown in the app's map/footer.
+- The address-search endpoint (Geoapify Geocoding API) is not yet implemented — only the
+  location-based nearby search exists so far.
