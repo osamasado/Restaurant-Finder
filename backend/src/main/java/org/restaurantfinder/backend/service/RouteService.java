@@ -3,7 +3,10 @@ package org.restaurantfinder.backend.service;
 import org.restaurantfinder.backend.model.GeoapifyRoutingResponse;
 import org.restaurantfinder.backend.model.Route;
 import org.springframework.web.client.RestClient;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+@Service
 public class RouteService {
 
     private final RestClient restClient;
@@ -11,7 +14,10 @@ public class RouteService {
     private static final String GEOAPIFY_ROUTING_URL =
             "https://api.geoapify.com/v1/routing";
 
-    public RouteService(RestClient.Builder restClientBuilder, String apiKey) {
+    public RouteService(
+            RestClient.Builder restClientBuilder,
+            @Value("${geoapify.app.key}") String apiKey
+    ) {
         this.restClient = restClientBuilder
                 .baseUrl(GEOAPIFY_ROUTING_URL)
                 .build();
