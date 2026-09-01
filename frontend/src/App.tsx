@@ -8,11 +8,11 @@ function App() {
 
   return (
     <>
+     <NavBar/>
      <Routes>
          <Route path="/list" element={<RestaurantList />} />
          <Route path="/map" element={<RestaurantMap />} />
      </Routes>
-     <NavBar/>
     </>
   )
 }
