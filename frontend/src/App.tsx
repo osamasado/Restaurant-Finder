@@ -80,7 +80,7 @@ function App() {
             <main className="flex-1">
                 <Routes>
                     <Route path="/list" element={<RestaurantList restaurants={restaurants} />} />
-                    <Route path="/map" element={<RestaurantMap userLocation={userLocation}/>} />
+                    <Route path="/map" element={<RestaurantMap userLocation={userLocation} restaurants={restaurants} />} />
                 </Routes>
             </main>
 

@@ -1,13 +1,15 @@
-import {MapContainer, TileLayer, Marker, Popup} from "react-leaflet";
+import {MapContainer, TileLayer, Marker, Popup, CircleMarker} from "react-leaflet";
 import type {Location} from "../types/Location.ts";
 import "leaflet/dist/leaflet.css";
 import "./RestaurantMap.css";
+import type {Restaurant} from "../types/Restaurant.ts";
 
-export default function RestaurantMap({ userLocation }: Readonly<{userLocation: Location | null}>) {
+type RestaurantMapProps = {
+    userLocation: Location;
+    restaurants: Restaurant[];
+};
 
-    if (!userLocation) {
-        return <p>Getting your location...</p>;
-    }
+export default function RestaurantMap({userLocation, restaurants}: Readonly<RestaurantMapProps>) {
 
     const mapPosition: [number, number] = [
         userLocation.latitude,
@@ -24,11 +26,40 @@ export default function RestaurantMap({ userLocation }: Readonly<{userLocation: 
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <Marker position={mapPosition}>
-                <Popup>
-                    You are here 📍
-                </Popup>
-            </Marker>
+            {/* User marker */}
+            <CircleMarker
+                center={mapPosition}
+                radius={9}
+                pathOptions={{
+                    color: "white",
+                    weight: 3,
+                    fillColor: "#4285F4",
+                    fillOpacity: 1
+                }}
+            >
+                <Popup>You are here</Popup>
+            </CircleMarker>
+
+            {/* Restaurant markers */}
+            {restaurants.map((restaurant) => (
+                <Marker
+                    key={restaurant.id}
+                    position={[restaurant.latitude, restaurant.longitude]}
+                >
+                    <Popup>
+                        <strong>{restaurant.name}</strong>
+                        <br/>
+                        📍 {restaurant.address}
+
+                        {restaurant.openingHours && (
+                            <>
+                                <br/>
+                                🕒 {restaurant.openingHours}
+                            </>
+                        )}
+                    </Popup>
+                </Marker>
+            ))}
         </MapContainer>
     );
 }
