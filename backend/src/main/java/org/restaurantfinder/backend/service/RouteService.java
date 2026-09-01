@@ -42,6 +42,12 @@ public class RouteService {
                 .retrieve()
                 .body(GeoapifyRoutingResponse.class);
 
+        if (response == null ||
+                response.features() == null ||
+                response.features().isEmpty()) {
+            return null;
+        }
+
         var properties = response.features().getFirst().properties();
 
         return new Route(
