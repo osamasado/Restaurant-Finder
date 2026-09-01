@@ -58,6 +58,12 @@ implemented (Geoapify's `bias=proximity` biases results but doesn't guarantee a 
 address → calls `/api/restaurants/search` → same card/map rendering, re-centered on the searched
 location.
 
+## Frontend Map
+
+- The frontend uses React Leaflet and Leaflet for map functionality.
+- The user's location is obtained using the Browser Geolocation API.
+- OpenStreetMap tiles are currently used as the map tile provider.
+
 ## External API constraints (must respect)
 
 - **Geoapify:** free tier caps at 3,000 requests/day across all endpoints (Places + Geocoding
