@@ -46,12 +46,32 @@ public class RestaurantService {
     private Restaurant toRestaurant(GeoapifyPlacesResponse.Feature feature) {
         var properties = feature.properties();
         var contact = properties.contact();
+        var datasource = properties.datasource();
+        var raw = datasource != null ? datasource.raw() : null;
+        var geometry = feature.geometry();
+
+        Double longitude = null;
+        Double latitude = null;
+
+        if (geometry != null && geometry.coordinates() != null && geometry.coordinates().size() >= 2) {
+            longitude = geometry.coordinates().get(0);
+            latitude = geometry.coordinates().get(1);
+        }
+
         return Restaurant.builder()
                 .id(properties.placeId())
                 .name(properties.name())
                 .address(properties.addressLine2())
                 .phone(contact != null ? contact.phone() : null)
                 .email(contact != null ? contact.email() : null)
+                .website(properties.website())
+                .openingHours(properties.openingHours())
+                .distance(properties.distance())
+                .cuisine(raw != null ? raw.cuisine() : null)
+                .vegetarian(raw != null ? "yes".equalsIgnoreCase(raw.vegetarian()) : null)
+                .vegan(raw != null ? "yes".equalsIgnoreCase(raw.vegan()) : null)
+                .latitude(latitude)
+                .longitude(longitude)
                 .build();
     }
 }
