@@ -79,7 +79,15 @@ function App() {
             <Header />
             <main className="flex-1">
                 <Routes>
-                    <Route path="/list" element={<RestaurantList restaurants={restaurants} />} />
+                    <Route
+                        path="/list"
+                        element={
+                            <RestaurantList
+                                restaurants={restaurants}
+                                userLocation={userLocation}
+                            />
+                        }
+                    />
                     <Route path="/map" element={<RestaurantMap userLocation={userLocation}/>} />
                 </Routes>
             </main>
