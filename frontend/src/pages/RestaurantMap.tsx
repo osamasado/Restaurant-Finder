@@ -1,21 +1,21 @@
 import {MapContainer, TileLayer, Marker, Popup} from "react-leaflet";
-import type {Position} from "../types/Position.ts";
+import type {Location} from "../types/Location.ts";
 import "leaflet/dist/leaflet.css";
 import "./RestaurantMap.css";
 
 type RestaurantMapProps = {
-    position: Position | null;
+    location: Location | null;
 };
 
-export default function RestaurantMap({position}: Readonly<RestaurantMapProps>) {
+export default function RestaurantMap({location}: Readonly<RestaurantMapProps>) {
 
-    if (!position) {
+    if (!location) {
         return <p>Getting your location...</p>;
     }
 
     const mapPosition: [number, number] = [
-        position.latitude,
-        position.longitude
+        location.latitude,
+        location.longitude
     ];
 
     return (

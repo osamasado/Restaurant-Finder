@@ -5,18 +5,18 @@ import RestaurantMap from "./pages/RestaurantMap.tsx";
 import Header from "./components/Header.tsx";
 import Footer from "./components/Footer.tsx";
 import {useEffect, useState} from "react";
-import type {Position} from "./types/Position.ts";
+import type {Location} from "./types/Location.ts";
 
 function App() {
 
-    const [position, setPosition] = useState<Position | null>(null);
+    const [location, setLocation] = useState<Location | null>(null);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
-            (location) => {
-                setPosition({
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude
+            (currentPosition) => {
+                setLocation({
+                    latitude: currentPosition.coords.latitude,
+                    longitude: currentPosition.coords.longitude
                 });
             },
             (error) => {
@@ -32,7 +32,7 @@ function App() {
             <main className="flex-1">
                 <Routes>
                     <Route path="/list" element={<RestaurantList />} />
-                    <Route path="/map" element={<RestaurantMap position={position}/>} />
+                    <Route path="/map" element={<RestaurantMap location={location}/>} />
                 </Routes>
             </main>
 
