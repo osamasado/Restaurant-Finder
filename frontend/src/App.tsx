@@ -9,12 +9,12 @@ import type {Location} from "./types/Location.ts";
 
 function App() {
 
-    const [location, setLocation] = useState<Location | null>(null);
+    const [userLocation, setUserLocation] = useState<Location | null>(null);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (currentPosition) => {
-                setLocation({
+                setUserLocation({
                     latitude: currentPosition.coords.latitude,
                     longitude: currentPosition.coords.longitude
                 });
@@ -32,7 +32,7 @@ function App() {
             <main className="flex-1">
                 <Routes>
                     <Route path="/list" element={<RestaurantList />} />
-                    <Route path="/map" element={<RestaurantMap location={location}/>} />
+                    <Route path="/map" element={<RestaurantMap userLocation={userLocation}/>} />
                 </Routes>
             </main>
 

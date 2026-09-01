@@ -3,19 +3,15 @@ import type {Location} from "../types/Location.ts";
 import "leaflet/dist/leaflet.css";
 import "./RestaurantMap.css";
 
-type RestaurantMapProps = {
-    location: Location | null;
-};
+export default function RestaurantMap({ userLocation }: Readonly<{userLocation: Location | null}>) {
 
-export default function RestaurantMap({location}: Readonly<RestaurantMapProps>) {
-
-    if (!location) {
+    if (!userLocation) {
         return <p>Getting your location...</p>;
     }
 
     const mapPosition: [number, number] = [
-        location.latitude,
-        location.longitude
+        userLocation.latitude,
+        userLocation.longitude
     ];
 
     return (
