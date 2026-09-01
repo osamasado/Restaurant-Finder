@@ -1,33 +1,26 @@
 import {MapContainer, TileLayer, Marker, Popup} from "react-leaflet";
-import {useEffect, useState} from "react";
+import type {Position} from "../types/Position.ts";
 import "leaflet/dist/leaflet.css";
 import "./RestaurantMap.css";
 
-export default function RestaurantMap() {
+type RestaurantMapProps = {
+    position: Position | null;
+};
 
-    const [position, setPosition] = useState<[number, number] | null>(null);
-
-    useEffect(() => {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setPosition([
-                    position.coords.latitude,
-                    position.coords.longitude
-                ]);
-            },
-            (error) => {
-                console.error(error);
-            }
-        );
-    }, []);
+export default function RestaurantMap({position}: Readonly<RestaurantMapProps>) {
 
     if (!position) {
         return <p>Getting your location...</p>;
     }
 
+    const mapPosition: [number, number] = [
+        position.latitude,
+        position.longitude
+    ];
+
     return (
         <MapContainer
-            center={position}
+            center={mapPosition}
             zoom={17}
             className="restaurant-map"
         >
@@ -35,12 +28,11 @@ export default function RestaurantMap() {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <Marker position={position}>
+            <Marker position={mapPosition}>
                 <Popup>
                     You are here 📍
                 </Popup>
             </Marker>
-
         </MapContainer>
     );
 }
