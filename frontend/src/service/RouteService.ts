@@ -1,11 +1,12 @@
 import type { Route } from "../types/Route";
 import API from "./API";
 
-export async function getWalkingRoute(
+export async function getRoute(
     startLat: number,
     startLon: number,
     destinationLat: number,
-    destinationLon: number
+    destinationLon: number,
+    mode: string = "walk"
 ): Promise<Route> {
 
     const response = await API.get<Route>("/routes", {
@@ -13,7 +14,8 @@ export async function getWalkingRoute(
             startLat,
             startLon,
             destinationLat,
-            destinationLon
+            destinationLon,
+            mode
         }
     });
 

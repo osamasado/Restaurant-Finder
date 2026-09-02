@@ -11,11 +11,13 @@ import {getNearbyRestaurants} from "./service/RestaurantService.ts";
 import ErrorState from "./components/ErrorState.tsx";
 import LoadingState from "./components/LoadingState.tsx";
 import EmptyState from "./components/EmptyState.tsx";
+import type { Restaurant } from "./types/Restaurant.ts";
 
 function App() {
 
     const [userLocation, setUserLocation] = useState<Location | null>(null);
     const [geoError, setGeoError] = useState<string | null>(null);
+    const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
@@ -84,11 +86,19 @@ function App() {
                         element={
                             <RestaurantList
                                 restaurants={restaurants}
-                                userLocation={userLocation}
+                                setSelectedRestaurant={setSelectedRestaurant}
                             />
                         }
                     />
-                    <Route path="/map" element={<RestaurantMap userLocation={userLocation}/>} />
+                    <Route
+                        path="/map"
+                        element={
+                            <RestaurantMap
+                                userLocation={userLocation}
+                                selectedRestaurant={selectedRestaurant}
+                            />
+                        }
+                    />
                 </Routes>
             </main>
 

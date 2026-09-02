@@ -1,13 +1,12 @@
 import RestaurantCard from "../components/RestaurantCard";
 import type {Restaurant} from "../types/Restaurant.ts";
-import type { Location } from "../types/Location.ts";
 
 export default function RestaurantList({
                                            restaurants,
-                                           userLocation
+                                           setSelectedRestaurant
                                        }: Readonly<{
     restaurants: Restaurant[],
-    userLocation: Location
+    setSelectedRestaurant: (restaurant: Restaurant) => void
 }>) {
     return (
         <div className="max-w-5xl mx-auto px-6 py-8">
@@ -16,7 +15,7 @@ export default function RestaurantList({
                     <RestaurantCard
                         key={restaurant.id}
                         restaurant={restaurant}
-                        userLocation={userLocation}
+                        setSelectedRestaurant={setSelectedRestaurant}
                     />
                 ))}
             </div>
