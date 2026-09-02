@@ -3,9 +3,6 @@
 *.iml
 
 #backend
-/backend/.mvn
-/backend/mvnw
-/backend/mvnw.cmd
 /backend/target
 
 #frontend

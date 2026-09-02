@@ -1,4 +1,11 @@
-import {MapContainer, TileLayer, Marker, Popup, Polyline} from "react-leaflet";
+import {
+    MapContainer,
+    TileLayer,
+    Marker,
+    Popup,
+    CircleMarker,
+    Polyline
+} from "react-leaflet";
 import type {Route} from "../types/Route.ts";
 import type {Location} from "../types/Location.ts";
 import type {Restaurant} from "../types/Restaurant.ts";
@@ -7,19 +14,22 @@ import {getRoute} from "../service/RouteService.ts";
 import "leaflet/dist/leaflet.css";
 import "./RestaurantMap.css";
 
-export default function RestaurantMap(
-    {
-        userLocation,
-        selectedRestaurant
-    }: Readonly<{
-        userLocation: Location | null,
-        selectedRestaurant: Restaurant | null
-    }>) {
+type RestaurantMapProps = {
+    userLocation: Location;
+    restaurants: Restaurant[];
+    selectedRestaurant: Restaurant | null;
+};
+
+export default function RestaurantMap({
+                                          userLocation,
+                                          restaurants,
+                                          selectedRestaurant
+                                      }: Readonly<RestaurantMapProps>) {
 
     const [walkingRoute, setWalkingRoute] = useState<Route | null>(null);
 
     useEffect(() => {
-        if (!userLocation || !selectedRestaurant) {
+        if (!selectedRestaurant) {
             return;
         }
 
@@ -38,10 +48,6 @@ export default function RestaurantMap(
             });
 
     }, [userLocation, selectedRestaurant]);
-
-    if (!userLocation) {
-        return <p>Getting your location...</p>;
-    }
 
     const mapPosition: [number, number] = [
         userLocation.latitude,
@@ -65,25 +71,45 @@ export default function RestaurantMap(
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                <Marker position={mapPosition}>
-                    <Popup>
-                        You are here 📍
-                    </Popup>
-                </Marker>
+                {/* User marker */}
+                <CircleMarker
+                    center={mapPosition}
+                    radius={9}
+                    pathOptions={{
+                        color: "white",
+                        weight: 3,
+                        fillColor: "#4285F4",
+                        fillOpacity: 1
+                    }}
+                >
+                    <Popup>You are here</Popup>
+                </CircleMarker>
 
-                {selectedRestaurant && (
+                {/* Restaurant markers */}
+                {restaurants.map((restaurant) => (
                     <Marker
+                        key={restaurant.id}
                         position={[
-                            selectedRestaurant.latitude,
-                            selectedRestaurant.longitude
+                            restaurant.latitude,
+                            restaurant.longitude
                         ]}
                     >
                         <Popup>
-                            {selectedRestaurant.name}
+                            <strong>{restaurant.name}</strong>
+                            <br/>
+                            📍 {restaurant.address}
+
+                            {restaurant.openingHours && (
+                                <>
+                                    <br/>
+                                    🕒 {restaurant.openingHours}
+                                </>
+                            )}
                         </Popup>
                     </Marker>
-                )}
+                ))}
 
+                {/* Walking route */}
                 {routePositions.length > 0 && (
                     <Polyline positions={routePositions}/>
                 )}

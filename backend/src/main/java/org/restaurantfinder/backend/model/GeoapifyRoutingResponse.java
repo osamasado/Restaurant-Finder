@@ -8,13 +8,23 @@ import java.util.List;
 public record GeoapifyRoutingResponse(List<Feature> features) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Feature(Properties properties) {
+    public record Feature(
+            Properties properties,
+            Geometry geometry
+    ) {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Properties(
             int distance,
             double time
+    ) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Geometry(
+            String type,
+            List<List<List<Double>>> coordinates
     ) {
     }
 }

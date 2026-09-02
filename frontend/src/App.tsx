@@ -6,12 +6,12 @@ import Header from "./components/Header.tsx";
 import Footer from "./components/Footer.tsx";
 import {useEffect, useState} from "react";
 import type {Location} from "./types/Location.ts";
+import type {Restaurant} from "./types/Restaurant.ts";
 import {useQuery} from "@tanstack/react-query";
 import {getNearbyRestaurants} from "./service/RestaurantService.ts";
 import ErrorState from "./components/ErrorState.tsx";
 import LoadingState from "./components/LoadingState.tsx";
 import EmptyState from "./components/EmptyState.tsx";
-import type { Restaurant } from "./types/Restaurant.ts";
 
 function App() {
 
@@ -38,8 +38,6 @@ function App() {
         );
     }, []);
 
-
-
     const {
         data: restaurants,
         isPending,
@@ -47,7 +45,10 @@ function App() {
         error,
     } = useQuery({
         queryKey: ["nearbyRestaurants", userLocation],
-        queryFn: () => getNearbyRestaurants(userLocation!.latitude, userLocation!.longitude),
+        queryFn: () => getNearbyRestaurants(
+            userLocation!.latitude,
+            userLocation!.longitude
+        ),
         enabled: userLocation !== null,
     });
 
@@ -75,10 +76,10 @@ function App() {
         return <EmptyState message="No restaurants found nearby." />;
     }
 
-  return (
-    <>
+    return (
         <div className="min-h-screen flex flex-col">
             <Header />
+
             <main className="flex-1">
                 <Routes>
                     <Route
@@ -90,11 +91,13 @@ function App() {
                             />
                         }
                     />
+
                     <Route
                         path="/map"
                         element={
                             <RestaurantMap
                                 userLocation={userLocation}
+                                restaurants={restaurants}
                                 selectedRestaurant={selectedRestaurant}
                             />
                         }
@@ -104,8 +107,7 @@ function App() {
 
             <Footer/>
         </div>
-    </>
-  )
+    );
 }
 
 export default App
