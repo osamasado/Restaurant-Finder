@@ -29,7 +29,8 @@ public class RouteService {
             double startLat,
             double startLon,
             double destinationLat,
-            double destinationLon
+            double destinationLon,
+            String mode
     ) {
         GeoapifyRoutingResponse response = restClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -42,7 +43,7 @@ public class RouteService {
                                         destinationLon
                                 )
                         )
-                        .queryParam("mode", "walk")
+                        .queryParam("mode", mode)
                         .queryParam("apiKey", apiKey)
                         .build())
                 .retrieve()
@@ -54,11 +55,14 @@ public class RouteService {
             return null;
         }
 
-        var properties = response.features().getFirst().properties();
+        var feature = response.features().getFirst();
+        var properties = feature.properties();
+        var geometry = feature.geometry();
 
         return new Route(
                 properties.distance(),
-                properties.time()
+                properties.time(),
+                geometry.coordinates().getFirst()
         );
     }
 }

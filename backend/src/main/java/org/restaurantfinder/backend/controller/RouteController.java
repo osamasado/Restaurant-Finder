@@ -22,13 +22,15 @@ public class RouteController {
             @RequestParam double startLat,
             @RequestParam double startLon,
             @RequestParam double destinationLat,
-            @RequestParam double destinationLon
+            @RequestParam double destinationLon,
+            @RequestParam(defaultValue = "walk") String mode
     ) {
         return routeService.getRoute(
                 startLat,
                 startLon,
                 destinationLat,
-                destinationLon
+                destinationLon,
+                mode
         );
     }
 }
