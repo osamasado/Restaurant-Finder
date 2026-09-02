@@ -24,7 +24,14 @@ class RouteServiceTest {
 
     @Test
     void shouldReturnRouteWithDistanceAndDuration() {
-        Route route = new Route(39, 36.2);
+        Route route = new Route(
+                39,
+                36.2,
+                java.util.List.of(
+                        java.util.List.of(9.7450007, 52.3809821),
+                        java.util.List.of(9.7447447, 52.3812597)
+                )
+        );
 
         assertEquals(39, route.distance());
         assertEquals(36.2, route.duration());
@@ -47,17 +54,26 @@ class RouteServiceTest {
                 MockRestServiceServer.bindTo(builder).build();
 
         String responseBody = """
+        {
+          "features": [
             {
-              "features": [
-                {
-                  "properties": {
-                    "distance": 39,
-                    "time": 36.2
-                  }
-                }
-              ]
+              "properties": {
+                "distance": 39,
+                "time": 36.2
+              },
+              "geometry": {
+                "type": "MultiLineString",
+                "coordinates": [
+                  [
+                    [9.7450007, 52.3809821],
+                    [9.7447447, 52.3812597]
+                  ]
+                ]
+              }
             }
-            """;
+          ]
+        }
+        """;
 
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
@@ -68,7 +84,8 @@ class RouteServiceTest {
                 52.3809821,
                 9.7450007,
                 52.3812597,
-                9.7447447
+                9.7447447,
+                "walk"
         );
 
         assertEquals(39, route.distance());
@@ -97,7 +114,8 @@ class RouteServiceTest {
                 52.3809821,
                 9.7450007,
                 52.3812597,
-                9.7447447
+                9.7447447,
+                "walk"
         );
 
         assertNull(route);

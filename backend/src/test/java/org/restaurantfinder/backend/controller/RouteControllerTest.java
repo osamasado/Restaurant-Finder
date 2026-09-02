@@ -26,13 +26,21 @@ class RouteControllerTest {
     void shouldReturnRoute() {
         RouteService routeService = mock(RouteService.class);
 
-        Route expectedRoute = new Route(39, 36.2);
+        Route expectedRoute = new Route(
+                39,
+                36.2,
+                java.util.List.of(
+                        java.util.List.of(9.7450007, 52.3809821),
+                        java.util.List.of(9.7447447, 52.3812597)
+                )
+        );
 
         when(routeService.getRoute(
                 52.3809821,
                 9.7450007,
                 52.3812597,
-                9.7447447
+                9.7447447,
+                "walk"
         )).thenReturn(expectedRoute);
 
         RouteController routeController = new RouteController(routeService);
@@ -41,7 +49,8 @@ class RouteControllerTest {
                 52.3809821,
                 9.7450007,
                 52.3812597,
-                9.7447447
+                9.7447447,
+                "walk"
         );
 
         assertEquals(expectedRoute, actualRoute);
