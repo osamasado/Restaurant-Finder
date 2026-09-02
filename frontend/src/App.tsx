@@ -6,6 +6,7 @@ import Header from "./components/Header.tsx";
 import Footer from "./components/Footer.tsx";
 import {useEffect, useState} from "react";
 import type {Location} from "./types/Location.ts";
+import type {Restaurant} from "./types/Restaurant.ts";
 import {useQuery} from "@tanstack/react-query";
 import {getNearbyRestaurants} from "./service/RestaurantService.ts";
 import ErrorState from "./components/ErrorState.tsx";
@@ -16,6 +17,7 @@ function App() {
 
     const [userLocation, setUserLocation] = useState<Location | null>(null);
     const [geoError, setGeoError] = useState<string | null>(null);
+    const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
@@ -36,8 +38,6 @@ function App() {
         );
     }, []);
 
-
-
     const {
         data: restaurants,
         isPending,
@@ -45,7 +45,10 @@ function App() {
         error,
     } = useQuery({
         queryKey: ["nearbyRestaurants", userLocation],
-        queryFn: () => getNearbyRestaurants(userLocation!.latitude, userLocation!.longitude),
+        queryFn: () => getNearbyRestaurants(
+            userLocation!.latitude,
+            userLocation!.longitude
+        ),
         enabled: userLocation !== null,
     });
 
@@ -73,21 +76,38 @@ function App() {
         return <EmptyState message="No restaurants found nearby." />;
     }
 
-  return (
-    <>
+    return (
         <div className="min-h-screen flex flex-col">
             <Header />
+
             <main className="flex-1">
                 <Routes>
-                    <Route path="/list" element={<RestaurantList restaurants={restaurants} />} />
-                    <Route path="/map" element={<RestaurantMap userLocation={userLocation} restaurants={restaurants} />} />
+                    <Route
+                        path="/list"
+                        element={
+                            <RestaurantList
+                                restaurants={restaurants}
+                                setSelectedRestaurant={setSelectedRestaurant}
+                            />
+                        }
+                    />
+
+                    <Route
+                        path="/map"
+                        element={
+                            <RestaurantMap
+                                userLocation={userLocation}
+                                restaurants={restaurants}
+                                selectedRestaurant={selectedRestaurant}
+                            />
+                        }
+                    />
                 </Routes>
             </main>
 
             <Footer/>
         </div>
-    </>
-  )
+    );
 }
 
 export default App
