@@ -1,18 +1,16 @@
 import {Clock, Leaf, MapPin, Navigation, Phone, UtensilsCrossed} from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import type {Restaurant} from "../types/Restaurant";
 
 export default function RestaurantCard(
     {
         restaurant,
-        setSelectedRestaurant
+        setSelectedRestaurant,
+        onSelectRestaurant
     }: {
         restaurant: Restaurant,
-        setSelectedRestaurant: (restaurant: Restaurant) => void
+        setSelectedRestaurant: (restaurant: Restaurant) => void,
+        onSelectRestaurant: () => void
     }) {
-
-    const navigate = useNavigate();
-
 
     return (
         <div
@@ -22,7 +20,7 @@ export default function RestaurantCard(
                 <button
                     onClick={() => {
                         setSelectedRestaurant(restaurant);
-                        navigate("/map");
+                        onSelectRestaurant();
                     }}
                     className="shrink-0 flex items-center gap-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full hover:bg-blue-600"
                 >
