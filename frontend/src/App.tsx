@@ -1,5 +1,4 @@
 import './App.css'
-import {Route, Routes} from "react-router-dom";
 import RestaurantList from "./pages/RestaurantList.tsx";
 import RestaurantMap from "./pages/RestaurantMap.tsx";
 import Header from "./components/Header.tsx";
@@ -7,6 +6,7 @@ import Footer from "./components/Footer.tsx";
 import {useEffect, useState} from "react";
 import type {Location} from "./types/Location.ts";
 import type {Restaurant} from "./types/Restaurant.ts";
+import type {ViewMode} from "./types/ViewMode.ts";
 import {useQuery} from "@tanstack/react-query";
 import {getNearbyRestaurants} from "./service/RestaurantService.ts";
 import ErrorState from "./components/ErrorState.tsx";
@@ -18,6 +18,7 @@ function App() {
     const [userLocation, setUserLocation] = useState<Location | null>(null);
     const [geoError, setGeoError] = useState<string | null>(null);
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+    const [view, setView] = useState<ViewMode>("map");
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
@@ -78,31 +79,22 @@ function App() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <Header />
+            <Header view={view} onChangeView={setView} />
 
             <main className="flex-1">
-                <Routes>
-                    <Route
-                        path="/list"
-                        element={
-                            <RestaurantList
-                                restaurants={restaurants}
-                                setSelectedRestaurant={setSelectedRestaurant}
-                            />
-                        }
+                {view === "list" ? (
+                    <RestaurantList
+                        restaurants={restaurants}
+                        setSelectedRestaurant={setSelectedRestaurant}
+                        onSelectRestaurant={() => setView("map")}
                     />
-
-                    <Route
-                        path="/map"
-                        element={
-                            <RestaurantMap
-                                userLocation={userLocation}
-                                restaurants={restaurants}
-                                selectedRestaurant={selectedRestaurant}
-                            />
-                        }
+                ) : (
+                    <RestaurantMap
+                        userLocation={userLocation}
+                        restaurants={restaurants}
+                        selectedRestaurant={selectedRestaurant}
                     />
-                </Routes>
+                )}
             </main>
 
             <Footer/>

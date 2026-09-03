@@ -3,10 +3,12 @@ import type {Restaurant} from "../types/Restaurant.ts";
 
 export default function RestaurantList({
                                            restaurants,
-                                           setSelectedRestaurant
+                                           setSelectedRestaurant,
+                                           onSelectRestaurant
                                        }: Readonly<{
     restaurants: Restaurant[],
-    setSelectedRestaurant: (restaurant: Restaurant) => void
+    setSelectedRestaurant: (restaurant: Restaurant) => void,
+    onSelectRestaurant: () => void
 }>) {
     return (
         <div className="max-w-5xl mx-auto px-6 py-8">
@@ -16,6 +18,7 @@ export default function RestaurantList({
                         key={restaurant.id}
                         restaurant={restaurant}
                         setSelectedRestaurant={setSelectedRestaurant}
+                        onSelectRestaurant={onSelectRestaurant}
                     />
                 ))}
             </div>
