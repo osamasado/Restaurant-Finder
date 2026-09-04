@@ -4,6 +4,7 @@
 
 #backend
 /backend/target
+/backend/src/main/resources/static
 
 #frontend
 frontend/node_modules
