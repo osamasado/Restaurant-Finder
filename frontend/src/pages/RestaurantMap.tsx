@@ -11,8 +11,22 @@ import type {Location} from "../types/Location.ts";
 import type {Restaurant} from "../types/Restaurant.ts";
 import {useEffect, useState} from "react";
 import {getRoute} from "../service/RouteService.ts";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./RestaurantMap.css";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+// Vite inlines these PNGs as base64 in prod, breaking Leaflet's icon path
+// detection. _getIconUrl also prepends that path to our full URLs, so delete
+// it before overriding.
+delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow
+});
 
 type RestaurantMapProps = {
     userLocation: Location;
