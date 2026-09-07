@@ -1,0 +1,91 @@
+name: Restaurant Finder Deployment
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: | # to execute more commands at the same time
+          npm install
+          npm run build
+
+      - uses: actions/upload-artifact@v5 # Ctrl + C Copy what we have built
+        with:
+          name: frontend-build
+          path: frontend/dist/
+
+  build-backend:
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v5 # Ctrl + P Paste files to selectd path
+        with:
+          name: frontend-build
+          path: backend/src/main/resources/static
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Build with Maven
+        run: mvn -B package --file backend/pom.xml
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: app.jar
+          path: backend/target/app.jar
+
+  push-to-docker-hub:
+    runs-on: ubuntu-latest
+    needs: build-backend
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: app.jar
+          path: backend/target
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          push: 'true'
+          tags: ${{ secrets.DOCKERHUB_TAG }}
+          context: .
+
+
+  deploy-to-render:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: push-to-docker-hub
+    environment:
+      name: 'Restaurant Finder'
+      url: 'https://restaurant-finder-app-e8wf.onrender.com'
+    steps:
+      - name: Trigger Render.com Deployment Process
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+
+
