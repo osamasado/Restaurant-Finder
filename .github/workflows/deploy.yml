@@ -1,4 +1,4 @@
-name: dployment.yml
+name: Restaurant Finder Deployment
 on:
   push:
     branches:
