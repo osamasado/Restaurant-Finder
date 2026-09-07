@@ -12,4 +12,5 @@ export type Restaurant = {
     vegan: boolean,
     latitude: number,
     longitude: number,
+    imageUrl?: string,
 }

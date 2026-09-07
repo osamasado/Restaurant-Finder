@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Restaurant placeholder image">
+  <rect width="400" height="300" fill="#e2e8f0"/>
+  <g fill="none" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- fork -->
+    <line x1="150" y1="105" x2="150" y2="195"/>
+    <line x1="138" y1="105" x2="138" y2="130"/>
+    <line x1="162" y1="105" x2="162" y2="130"/>
+    <path d="M138 130 Q150 145 162 130"/>
+    <!-- knife -->
+    <path d="M250 105 v55 a12 12 0 0 1 -12 12 v23"/>
+  </g>
+</svg>
