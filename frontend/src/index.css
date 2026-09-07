@@ -14,25 +14,15 @@
     width: auto !important;
 }
 
+/* Leaflet's own stylesheet forces `margin: 17px 0` on every <p> inside popup
+   content (for readability in plain-text popups) — that's the real source
+   of the gaps between RestaurantPopupCard's info rows, not Tailwind. */
+.restaurant-popup .leaflet-popup-content p {
+    margin: 0;
+}
+
 .restaurant-popup .leaflet-popup-tip-container {
     margin-top: -1px;
-}
-
-.leaflet-container .restaurant-popup .leaflet-popup-close-button {
-    top: 6px;
-    right: 6px;
-    width: 22px;
-    height: 22px;
-    line-height: 20px;
-    border-radius: 9999px;
-    background: rgba(15, 23, 42, 0.55);
-    color: white;
-}
-
-.leaflet-container .restaurant-popup .leaflet-popup-close-button:hover,
-.leaflet-container .restaurant-popup .leaflet-popup-close-button:focus {
-    background: rgba(15, 23, 42, 0.75);
-    color: white;
 }
 /*:root {*/
 /*  --text: #6b6375;*/

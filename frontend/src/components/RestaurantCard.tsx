@@ -38,7 +38,7 @@ export default function RestaurantCard(
                     </button>
                 </div>
 
-                <div className="mt-3 flex flex-col gap-1.5">
+                <div className="mt-2 flex flex-col gap-1">
                     <p className="flex items-center gap-2 text-sm text-slate-500">
                         <MapPin className="size-4 shrink-0 text-slate-400"/>
                         {restaurant.address}
@@ -79,7 +79,7 @@ export default function RestaurantCard(
                 </div>
 
                 {(restaurant.vegetarian || restaurant.vegan) && (
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-2 flex gap-2">
                         {restaurant.vegetarian && (
                             <span
                                 className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs text-emerald-700">

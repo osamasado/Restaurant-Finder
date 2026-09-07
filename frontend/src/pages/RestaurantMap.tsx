@@ -9,9 +9,10 @@ import {
 import type {Route} from "../types/Route.ts";
 import type {Location} from "../types/Location.ts";
 import type {Restaurant} from "../types/Restaurant.ts";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {getRoute} from "../service/RouteService.ts";
 import L from "leaflet";
+import {X} from "lucide-react";
 import RestaurantPopupCard from "../components/RestaurantPopupCard.tsx";
 import "leaflet/dist/leaflet.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -32,7 +33,7 @@ type RestaurantMapProps = {
     userLocation: Location;
     restaurants: Restaurant[];
     selectedRestaurant: Restaurant | null;
-    setSelectedRestaurant: (restaurant: Restaurant) => void;
+    setSelectedRestaurant: (restaurant: Restaurant | null) => void;
 };
 
 export default function RestaurantMap({
@@ -43,6 +44,7 @@ export default function RestaurantMap({
                                       }: Readonly<RestaurantMapProps>) {
 
     const [walkingRoute, setWalkingRoute] = useState<Route | null>(null);
+    const markerRefs = useRef<Map<string, L.Marker>>(new Map());
 
     useEffect(() => {
         if (!selectedRestaurant) {
@@ -110,11 +112,22 @@ export default function RestaurantMap({
                             restaurant.latitude,
                             restaurant.longitude
                         ]}
+                        ref={(marker) => {
+                            if (marker) {
+                                markerRefs.current.set(restaurant.id, marker);
+                            } else {
+                                markerRefs.current.delete(restaurant.id);
+                            }
+                        }}
                     >
-                        <Popup className="restaurant-popup" minWidth={224} maxWidth={224}>
+                        <Popup className="restaurant-popup" closeButton={false} minWidth={224} maxWidth={224}>
                             <RestaurantPopupCard
                                 restaurant={restaurant}
-                                onSelectRestaurant={() => setSelectedRestaurant(restaurant)}
+                                onSelectRestaurant={() => {
+                                    setSelectedRestaurant(restaurant);
+                                    markerRefs.current.get(restaurant.id)?.closePopup();
+                                }}
+                                onClose={() => markerRefs.current.get(restaurant.id)?.closePopup()}
                             />
                         </Popup>
                     </Marker>
@@ -128,8 +141,20 @@ export default function RestaurantMap({
 
             {walkingRoute && (
                 <div className="mx-auto mt-4 max-w-md px-4">
-                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                        <p className="font-semibold text-slate-900">
+                    <div className="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setWalkingRoute(null);
+                                setSelectedRestaurant(null);
+                            }}
+                            aria-label="Close walking route"
+                            className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        >
+                            <X className="size-4"/>
+                        </button>
+
+                        <p className="pr-6 font-semibold text-slate-900">
                             🚶 Walking Route
                         </p>
 
