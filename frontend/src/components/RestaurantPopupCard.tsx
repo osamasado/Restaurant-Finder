@@ -14,7 +14,7 @@ export default function RestaurantPopupCard(
         <div className="w-56">
             <div className="relative">
                 <img
-                    src={restaurant.imageUrl ?? "/images/restaurant-placeholder.svg"}
+                    src={restaurant.imageUrl ?? "/images/plate.svg"}
                     alt={restaurant.name}
                     className="h-28 w-full object-cover"
                 />

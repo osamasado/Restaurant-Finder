@@ -18,7 +18,7 @@ export default function RestaurantCard(
         <div
             className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
             <img
-                src={restaurant.imageUrl ?? "/images/restaurant-placeholder.svg"}
+                src={restaurant.imageUrl ?? "/images/plate.svg"}
                 alt={restaurant.name}
                 className="h-36 w-full object-cover"
             />

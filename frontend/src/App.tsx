@@ -18,6 +18,7 @@ function App() {
     const [geoError, setGeoError] = useState<string | null>(null);
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
     const [view, setView] = useState<ViewMode>("map");
+    const [radius, setRadius] = useState<number>(2000);
 
     const fetchLocation = useCallback(() => {
         navigator.geolocation.getCurrentPosition(
@@ -54,10 +55,11 @@ function App() {
         error,
         refetch,
     } = useQuery({
-        queryKey: ["nearbyRestaurants", userLocation],
+        queryKey: ["nearbyRestaurants", userLocation, radius],
         queryFn: () => getNearbyRestaurants(
             userLocation!.latitude,
-            userLocation!.longitude
+            userLocation!.longitude,
+            radius
         ),
         enabled: userLocation !== null,
     });
@@ -70,34 +72,30 @@ function App() {
         return <LoadingState message="Getting your location..." />;
     }
 
-    if (isPending) {
-        return <LoadingState message="Loading nearby restaurants..." variant="cards" />;
-    }
-
-    if (isError) {
-        return (
-            <ErrorState
-                message={`We couldn't load nearby restaurants${error instanceof Error ? `: ${error.message}` : "."}`}
-                onRetry={() => refetch()}
-            />
-        );
-    }
-
-    if (restaurants.length === 0) {
-        return (
-            <EmptyState
-                title="No restaurants found"
-                description="We couldn't find any restaurants near your location. Try moving to another area or searching again."
-            />
-        );
-    }
-
     return (
         <div className="min-h-screen flex flex-col">
-            <Header view={view} onChangeView={setView} />
+            <Header
+                view={view}
+                onChangeView={setView}
+                radius={radius}
+                onChangeRadius={setRadius}
+                isLoadingRestaurants={isPending}
+            />
 
             <main className="flex-1">
-                {view === "list" ? (
+                {isPending ? (
+                    <LoadingState message="Loading nearby restaurants..." variant="cards" />
+                ) : isError ? (
+                    <ErrorState
+                        message={`We couldn't load nearby restaurants${error instanceof Error ? `: ${error.message}` : "."}`}
+                        onRetry={() => refetch()}
+                    />
+                ) : restaurants.length === 0 ? (
+                    <EmptyState
+                        title="No restaurants found"
+                        description="We couldn't find any restaurants near your location. Try moving to another area or searching again."
+                    />
+                ) : view === "list" ? (
                     <RestaurantList
                         restaurants={restaurants}
                         setSelectedRestaurant={setSelectedRestaurant}
