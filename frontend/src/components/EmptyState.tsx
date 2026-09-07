@@ -1,10 +1,18 @@
 import { SearchX } from "lucide-react";
 
-export default function EmptyState({ message }: { message: string }) {
+type EmptyStateProps = {
+    title: string;
+    description: string;
+}
+
+export default function EmptyState({ title, description }: Readonly<EmptyStateProps>) {
     return (
-        <div className="max-w-5xl mx-auto px-6 py-24 flex flex-col items-center justify-center gap-4 text-center">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-4 px-6 py-24 text-center">
             <SearchX className="size-10 text-slate-400" />
-            <p className="text-sm font-medium text-slate-500 max-w-md">{message}</p>
+            <div>
+                <p className="font-semibold text-slate-900">{title}</p>
+                <p className="mt-1 max-w-md text-sm text-slate-500">{description}</p>
+            </div>
         </div>
     );
 }

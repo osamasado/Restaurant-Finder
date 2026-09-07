@@ -11,19 +11,21 @@ import type {Location} from "../types/Location.ts";
 import type {Restaurant} from "../types/Restaurant.ts";
 import {useEffect, useState} from "react";
 import {getRoute} from "../service/RouteService.ts";
+import RestaurantPopupCard from "../components/RestaurantPopupCard.tsx";
 import "leaflet/dist/leaflet.css";
-import "./RestaurantMap.css";
 
 type RestaurantMapProps = {
     userLocation: Location;
     restaurants: Restaurant[];
     selectedRestaurant: Restaurant | null;
+    setSelectedRestaurant: (restaurant: Restaurant) => void;
 };
 
 export default function RestaurantMap({
                                           userLocation,
                                           restaurants,
-                                          selectedRestaurant
+                                          selectedRestaurant,
+                                          setSelectedRestaurant
                                       }: Readonly<RestaurantMapProps>) {
 
     const [walkingRoute, setWalkingRoute] = useState<Route | null>(null);
@@ -65,10 +67,11 @@ export default function RestaurantMap({
             <MapContainer
                 center={mapPosition}
                 zoom={17}
-                className="restaurant-map"
+                className="h-[450px] w-full rounded-xl md:h-[600px]"
             >
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution="&copy; OpenStreetMap contributors"
                 />
 
                 {/* User marker */}
@@ -94,17 +97,11 @@ export default function RestaurantMap({
                             restaurant.longitude
                         ]}
                     >
-                        <Popup>
-                            <strong>{restaurant.name}</strong>
-                            <br/>
-                            📍 {restaurant.address}
-
-                            {restaurant.openingHours && (
-                                <>
-                                    <br/>
-                                    🕒 {restaurant.openingHours}
-                                </>
-                            )}
+                        <Popup className="restaurant-popup" minWidth={224} maxWidth={224}>
+                            <RestaurantPopupCard
+                                restaurant={restaurant}
+                                onSelectRestaurant={() => setSelectedRestaurant(restaurant)}
+                            />
                         </Popup>
                     </Marker>
                 ))}
@@ -116,17 +113,17 @@ export default function RestaurantMap({
             </MapContainer>
 
             {walkingRoute && (
-                <div className="max-w-md mx-auto mt-4 px-4">
-                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow">
-                        <p className="font-semibold">
+                <div className="mx-auto mt-4 max-w-md px-4">
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <p className="font-semibold text-slate-900">
                             🚶 Walking Route
                         </p>
 
-                        <p className="mt-2">
+                        <p className="mt-2 text-sm text-slate-600">
                             Distance: {Math.round(walkingRoute.distance)} m
                         </p>
 
-                        <p>
+                        <p className="text-sm text-slate-600">
                             Estimated time: {Math.round(walkingRoute.duration / 60)} min
                         </p>
                     </div>

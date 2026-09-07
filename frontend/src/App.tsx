@@ -1,9 +1,8 @@
-import './App.css'
 import RestaurantList from "./pages/RestaurantList.tsx";
 import RestaurantMap from "./pages/RestaurantMap.tsx";
 import Header from "./components/Header.tsx";
 import Footer from "./components/Footer.tsx";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import type {Location} from "./types/Location.ts";
 import type {Restaurant} from "./types/Restaurant.ts";
 import type {ViewMode} from "./types/ViewMode.ts";
@@ -20,7 +19,7 @@ function App() {
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
     const [view, setView] = useState<ViewMode>("map");
 
-    useEffect(() => {
+    const fetchLocation = useCallback(() => {
         navigator.geolocation.getCurrentPosition(
             (currentPosition) => {
                 setUserLocation({
@@ -39,11 +38,21 @@ function App() {
         );
     }, []);
 
+    useEffect(() => {
+        fetchLocation();
+    }, [fetchLocation]);
+
+    const retryLocation = useCallback(() => {
+        setGeoError(null);
+        fetchLocation();
+    }, [fetchLocation]);
+
     const {
         data: restaurants,
         isPending,
         isError,
         error,
+        refetch,
     } = useQuery({
         queryKey: ["nearbyRestaurants", userLocation],
         queryFn: () => getNearbyRestaurants(
@@ -54,7 +63,7 @@ function App() {
     });
 
     if (geoError) {
-        return <ErrorState message={geoError} />;
+        return <ErrorState message={geoError} onRetry={retryLocation} />;
     }
 
     if (!userLocation) {
@@ -62,19 +71,25 @@ function App() {
     }
 
     if (isPending) {
-        return <LoadingState message="Loading nearby restaurants..." />;
+        return <LoadingState message="Loading nearby restaurants..." variant="cards" />;
     }
 
     if (isError) {
         return (
             <ErrorState
-                message={`Failed to load restaurants${error instanceof Error ? `: ${error.message}` : "."}`}
+                message={`We couldn't load nearby restaurants${error instanceof Error ? `: ${error.message}` : "."}`}
+                onRetry={() => refetch()}
             />
         );
     }
 
     if (restaurants.length === 0) {
-        return <EmptyState message="No restaurants found nearby." />;
+        return (
+            <EmptyState
+                title="No restaurants found"
+                description="We couldn't find any restaurants near your location. Try moving to another area or searching again."
+            />
+        );
     }
 
     return (
@@ -93,6 +108,7 @@ function App() {
                         userLocation={userLocation}
                         restaurants={restaurants}
                         selectedRestaurant={selectedRestaurant}
+                        setSelectedRestaurant={setSelectedRestaurant}
                     />
                 )}
             </main>

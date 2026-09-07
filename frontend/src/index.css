@@ -1,4 +1,39 @@
 @import "tailwindcss";
+
+/* Leaflet renders its popup chrome outside our component tree, so it can't be
+   reached with Tailwind classes — these overrides let RestaurantPopupCard's
+   image bleed to the popup's edges. */
+.restaurant-popup .leaflet-popup-content-wrapper {
+    padding: 0;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.restaurant-popup .leaflet-popup-content {
+    margin: 0;
+    width: auto !important;
+}
+
+.restaurant-popup .leaflet-popup-tip-container {
+    margin-top: -1px;
+}
+
+.leaflet-container .restaurant-popup .leaflet-popup-close-button {
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    line-height: 20px;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.55);
+    color: white;
+}
+
+.leaflet-container .restaurant-popup .leaflet-popup-close-button:hover,
+.leaflet-container .restaurant-popup .leaflet-popup-close-button:focus {
+    background: rgba(15, 23, 42, 0.75);
+    color: white;
+}
 /*:root {*/
 /*  --text: #6b6375;*/
 /*  --text-h: #08060d;*/
