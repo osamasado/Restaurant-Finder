@@ -1,14 +1,23 @@
 import ViewToggle from "./ViewToggle.tsx";
+import RadiusSlider from "./RadiusSlider.tsx";
 import type {ViewMode} from "../types/ViewMode.ts";
 
 type HeaderProps = {
     view: ViewMode;
     onChangeView: (view: ViewMode) => void;
+    radius: number;
+    onChangeRadius: (radius: number) => void;
+    isLoadingRestaurants?: boolean;
+    resultCount?: number;
 }
 
 export default function Header({
     view,
-    onChangeView
+    onChangeView,
+    radius,
+    onChangeRadius,
+    isLoadingRestaurants,
+    resultCount
 }: Readonly<HeaderProps>) {
     return (
         <header className="bg-slate-900 px-6 py-8 text-white sm:py-12">
@@ -27,6 +36,19 @@ export default function Header({
                 </div>
 
                 <ViewToggle view={view} onChangeView={onChangeView}/>
+
+                <RadiusSlider
+                    value={radius}
+                    onChange={onChangeRadius}
+                    disabled={isLoadingRestaurants}
+                />
+
+                {resultCount !== undefined && (
+                    <p className="text-sm text-slate-300">
+                        <span className="font-semibold text-white">{resultCount}</span>{" "}
+                        restaurant{resultCount === 1 ? "" : "s"} found
+                    </p>
+                )}
             </div>
         </header>
     )
