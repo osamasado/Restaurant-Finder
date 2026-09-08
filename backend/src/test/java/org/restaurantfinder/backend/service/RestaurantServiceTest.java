@@ -2,14 +2,20 @@ package org.restaurantfinder.backend.service;
 
 import org.junit.jupiter.api.Test;
 
+import org.restaurantfinder.backend.exception.AddressNotFoundException;
+import org.restaurantfinder.backend.model.GeocodedLocation;
 import org.restaurantfinder.backend.model.Restaurant;
+import org.restaurantfinder.backend.model.RestaurantSearchResponse;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class RestaurantServiceTest {
@@ -18,7 +24,7 @@ class RestaurantServiceTest {
     void shouldCreateRestaurantService() {
         RestClient.Builder builder = RestClient.builder();
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key");
+        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
 
         assertNotNull(restaurantService);
     }
@@ -64,7 +70,7 @@ class RestaurantServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key");
+        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
 
         List<Restaurant> restaurants = restaurantService.getRestaurants(13.404954, 52.520008, 2000);
 
@@ -114,7 +120,7 @@ class RestaurantServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key");
+        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
 
         List<Restaurant> restaurants = restaurantService.getRestaurants(13.404954, 52.520008, 2000);
 
@@ -144,7 +150,7 @@ class RestaurantServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key");
+        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
 
         List<Restaurant> restaurants = restaurantService.getRestaurants(13.404954, 52.520008, 2000);
 
@@ -161,10 +167,64 @@ class RestaurantServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key");
+        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
 
         List<Restaurant> restaurants = restaurantService.getRestaurants(13.404954, 52.520008, 2000);
 
         assertTrue(restaurants.isEmpty());
+    }
+
+    @Test
+    void shouldSearchRestaurantsByGeocodedAddress() {
+        RestClient.Builder builder = RestClient.builder();
+
+        MockRestServiceServer server =
+                MockRestServiceServer.bindTo(builder).build();
+
+        String responseBody = """
+        {
+          "features": [
+            {
+              "properties": {
+                "place_id": "abc123",
+                "name": "BLOCK HOUSE",
+                "address_line2": "Karl-Liebknecht-Straße 7, 10178 Berlin, Germany",
+                "distance": 60
+              },
+              "geometry": {
+                "coordinates": [13.4051631, 52.5205315]
+              }
+            }
+          ]
+        }
+        """;
+
+        server.expect(request -> {})
+                .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+
+        GeocodingService geocodingService = mock(GeocodingService.class);
+        GeocodedLocation location = GeocodedLocation.builder().lat(52.520008).lon(13.404954).build();
+        when(geocodingService.geocode("Alexanderplatz, Berlin")).thenReturn(Optional.of(location));
+
+        RestaurantService restaurantService = new RestaurantService(builder, "test-key", geocodingService);
+
+        RestaurantSearchResponse response = restaurantService.searchByAddress("Alexanderplatz, Berlin", 2000);
+
+        assertEquals(location, response.location());
+        assertEquals(1, response.restaurants().size());
+        assertEquals("abc123", response.restaurants().getFirst().id());
+    }
+
+    @Test
+    void shouldThrowAddressNotFoundExceptionWhenAddressCannotBeGeocoded() {
+        RestClient.Builder builder = RestClient.builder();
+
+        GeocodingService geocodingService = mock(GeocodingService.class);
+        when(geocodingService.geocode("nonexistent address")).thenReturn(Optional.empty());
+
+        RestaurantService restaurantService = new RestaurantService(builder, "test-key", geocodingService);
+
+        assertThrows(AddressNotFoundException.class,
+                () -> restaurantService.searchByAddress("nonexistent address", 2000));
     }
 }
