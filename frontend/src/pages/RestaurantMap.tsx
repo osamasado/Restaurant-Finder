@@ -14,6 +14,7 @@ import {getRoute} from "../service/RouteService.ts";
 import L from "leaflet";
 import {X} from "lucide-react";
 import RestaurantPopupCard from "../components/RestaurantPopupCard.tsx";
+import LocateControl from "../components/LocateControl.tsx";
 import "leaflet/dist/leaflet.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -89,6 +90,8 @@ export default function RestaurantMap({
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&copy; OpenStreetMap contributors"
                 />
+
+                <LocateControl userLocation={userLocation}/>
 
                 {/* User marker */}
                 <CircleMarker
