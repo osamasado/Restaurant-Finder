@@ -1,6 +1,7 @@
 package org.restaurantfinder.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -15,7 +16,8 @@ public record GeoapifyGeocodingResponse(List<Feature> features) {
     public record Properties(
             String formatted,
             Double lat,
-            Double lon
+            Double lon,
+            @JsonProperty("result_type") String resultType
     ) {
     }
 }

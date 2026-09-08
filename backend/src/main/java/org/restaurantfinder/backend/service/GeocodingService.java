@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class GeocodingService {
@@ -18,6 +19,11 @@ public class GeocodingService {
     private final String apiKey;
     private static final String GEOAPIFY_GEOCODING_URL =
             "https://api.geoapify.com/v1/geocode";
+
+    // Geoapify's result_type for a match that only narrowed down to an administrative
+    // area or postal code, not an actual place - too imprecise to search "near".
+    private static final Set<String> VAGUE_RESULT_TYPES =
+            Set.of("country", "state", "county", "city", "postcode");
 
     public GeocodingService(RestClient.Builder restClientBuilder,
                              @Value("${geoapify.app.key}") String apiKey) {
@@ -45,6 +51,12 @@ public class GeocodingService {
 
         var properties = response.features().getFirst().properties();
 
+        // Reject results that only narrowed down to a city/postcode/country level -
+        // those land on an arbitrary point within that area rather than a real place.
+        if (isVague(properties.resultType())) {
+            return Optional.empty();
+        }
+
         return Optional.of(GeocodedLocation.builder()
                 .lat(properties.lat())
                 .lon(properties.lon())
@@ -68,11 +80,17 @@ public class GeocodingService {
         }
 
         return response.features().stream()
+                .filter(feature -> !isVague(feature.properties().resultType()))
                 .map(feature -> AddressSuggestion.builder()
                         .formattedAddress(feature.properties().formatted())
                         .lat(feature.properties().lat())
                         .lon(feature.properties().lon())
                         .build())
                 .toList();
+    }
+
+    // Missing result_type is treated as vague too - we can't confirm it's a specific place.
+    private boolean isVague(String resultType) {
+        return resultType == null || VAGUE_RESULT_TYPES.contains(resultType);
     }
 }
