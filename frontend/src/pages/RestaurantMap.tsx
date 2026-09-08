@@ -4,7 +4,8 @@ import {
     Marker,
     Popup,
     CircleMarker,
-    Polyline
+    Polyline,
+    useMap
 } from "react-leaflet";
 import type {Route} from "../types/Route.ts";
 import type {Location} from "../types/Location.ts";
@@ -32,13 +33,27 @@ L.Icon.Default.mergeOptions({
 
 type RestaurantMapProps = {
     userLocation: Location;
+    searchLocation?: Location | null;
     restaurants: Restaurant[];
     selectedRestaurant: Restaurant | null;
     setSelectedRestaurant: (restaurant: Restaurant | null) => void;
 };
 
+// MapContainer's `center` prop only applies once, on mount. When a search
+// resolves to a new location after the map is already showing, fly there.
+function RecenterMap({position}: Readonly<{ position: [number, number] }>) {
+    const map = useMap();
+
+    useEffect(() => {
+        map.flyTo(position);
+    }, [map, position]);
+
+    return null;
+}
+
 export default function RestaurantMap({
                                           userLocation,
+                                          searchLocation,
                                           restaurants,
                                           selectedRestaurant,
                                           setSelectedRestaurant
@@ -92,6 +107,10 @@ export default function RestaurantMap({
                 />
 
                 <LocateControl userLocation={userLocation}/>
+
+                {searchLocation && (
+                    <RecenterMap position={[searchLocation.latitude, searchLocation.longitude]}/>
+                )}
 
                 {/* User marker */}
                 <CircleMarker
