@@ -8,6 +8,7 @@ type HeaderProps = {
     radius: number;
     onChangeRadius: (radius: number) => void;
     isLoadingRestaurants?: boolean;
+    resultCount?: number;
 }
 
 export default function Header({
@@ -15,7 +16,8 @@ export default function Header({
     onChangeView,
     radius,
     onChangeRadius,
-    isLoadingRestaurants
+    isLoadingRestaurants,
+    resultCount
 }: Readonly<HeaderProps>) {
     return (
         <header className="bg-slate-900 px-6 py-8 text-white sm:py-12">
@@ -40,6 +42,13 @@ export default function Header({
                     onChange={onChangeRadius}
                     disabled={isLoadingRestaurants}
                 />
+
+                {resultCount !== undefined && (
+                    <p className="text-sm text-slate-300">
+                        <span className="font-semibold text-white">{resultCount}</span>{" "}
+                        restaurant{resultCount === 1 ? "" : "s"} found
+                    </p>
+                )}
             </div>
         </header>
     )

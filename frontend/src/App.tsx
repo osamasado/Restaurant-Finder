@@ -80,6 +80,7 @@ function App() {
                 radius={radius}
                 onChangeRadius={setRadius}
                 isLoadingRestaurants={isPending}
+                resultCount={restaurants?.length}
             />
 
             <main className="flex-1">
