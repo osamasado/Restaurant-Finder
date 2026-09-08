@@ -6,7 +6,7 @@ import {useCallback, useEffect, useState} from "react";
 import type {Location} from "./types/Location.ts";
 import type {Restaurant} from "./types/Restaurant.ts";
 import type {ViewMode} from "./types/ViewMode.ts";
-import {useQuery} from "@tanstack/react-query";
+import {keepPreviousData, useQuery} from "@tanstack/react-query";
 import {getNearbyRestaurants, searchRestaurantsByAddress} from "./service/RestaurantService.ts";
 import ErrorState from "./components/ErrorState.tsx";
 import LoadingState from "./components/LoadingState.tsx";
@@ -77,12 +77,16 @@ function App() {
             radius
         ),
         enabled: userLocation !== null && !isSearching,
+        // Keep showing the previous radius's results (and map) while a new
+        // radius loads, instead of unmounting everything behind a loading screen.
+        placeholderData: keepPreviousData,
     });
 
     const searchQuery = useQuery({
         queryKey: ["addressSearch", searchAddress, radius],
         queryFn: () => searchRestaurantsByAddress(searchAddress!, radius),
         enabled: isSearching,
+        placeholderData: keepPreviousData,
     });
 
     const activeQuery = isSearching ? searchQuery : nearbyQuery;

@@ -88,6 +88,13 @@ export default function RestaurantMap({
         userLocation.longitude
     ];
 
+    // MapContainer only reads `center` once, on mount - so the initial center
+    // must already account for an active search, or remounting this component
+    // (e.g. toggling List -> Map) would start at userLocation and jump from there.
+    const initialCenter: [number, number] = searchLocation
+        ? [searchLocation.latitude, searchLocation.longitude]
+        : mapPosition;
+
     const routePositions: [number, number][] =
         walkingRoute?.coordinates?.map(([longitude, latitude]) => [
             latitude,
@@ -97,7 +104,7 @@ export default function RestaurantMap({
     return (
         <div>
             <MapContainer
-                center={mapPosition}
+                center={initialCenter}
                 zoom={17}
                 className="h-[450px] w-full rounded-xl md:h-[600px]"
             >
@@ -109,7 +116,23 @@ export default function RestaurantMap({
                 <LocateControl userLocation={userLocation}/>
 
                 {searchLocation && (
-                    <RecenterMap position={[searchLocation.latitude, searchLocation.longitude]}/>
+                    <>
+                        <RecenterMap position={[searchLocation.latitude, searchLocation.longitude]}/>
+
+                        {/* Searched address marker */}
+                        <CircleMarker
+                            center={[searchLocation.latitude, searchLocation.longitude]}
+                            radius={9}
+                            pathOptions={{
+                                color: "white",
+                                weight: 3,
+                                fillColor: "#768190",
+                                fillOpacity: 1
+                            }}
+                        >
+                            <Popup>Searched location</Popup>
+                        </CircleMarker>
+                    </>
                 )}
 
                 {/* User marker */}
