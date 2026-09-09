@@ -1,5 +1,6 @@
 import ViewToggle from "./ViewToggle.tsx";
 import RadiusSlider from "./RadiusSlider.tsx";
+import SearchBar from "./SearchBar.tsx";
 import type {ViewMode} from "../types/ViewMode.ts";
 
 type HeaderProps = {
@@ -9,6 +10,11 @@ type HeaderProps = {
     onChangeRadius: (radius: number) => void;
     isLoadingRestaurants?: boolean;
     resultCount?: number;
+    onSearch: (address: string) => void;
+    isSearching: boolean;
+    isSearchActive: boolean;
+    searchError: string | null;
+    onClearSearch: () => void;
 }
 
 export default function Header({
@@ -17,7 +23,12 @@ export default function Header({
     radius,
     onChangeRadius,
     isLoadingRestaurants,
-    resultCount
+    resultCount,
+    onSearch,
+    isSearching,
+    isSearchActive,
+    searchError,
+    onClearSearch
 }: Readonly<HeaderProps>) {
     return (
         <header className="bg-slate-900 px-6 py-8 text-white sm:py-12">
@@ -31,9 +42,21 @@ export default function Header({
                         Find great restaurants nearby
                     </h1>
                     <p className="mt-2 text-sm text-slate-300 sm:text-base">
-                        Discover restaurants around your location
+                        Discover restaurants around your location, or search near an address
                     </p>
                 </div>
+
+                <SearchBar
+                    onSearch={onSearch}
+                    isSearching={isSearching}
+                    isSearchActive={isSearchActive}
+                    onClearSearch={onClearSearch}
+                />
+                {searchError && (
+                    <p className="max-w-md text-sm text-red-400" role="alert">
+                        {searchError}
+                    </p>
+                )}
 
                 <ViewToggle view={view} onChangeView={onChangeView}/>
 
