@@ -16,4 +16,22 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("message", exception.getMessage()));
     }
+
+    @ExceptionHandler(FavoriteAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleFavoriteAlreadyExists(
+            FavoriteAlreadyExistsException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(FavoriteNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleFavoriteNotFound(
+            FavoriteNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", exception.getMessage()));
+    }
 }
