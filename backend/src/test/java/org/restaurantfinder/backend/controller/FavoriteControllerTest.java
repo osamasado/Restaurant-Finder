@@ -2,6 +2,7 @@ package org.restaurantfinder.backend.controller;
 
 import org.junit.jupiter.api.Test;
 import org.restaurantfinder.backend.model.Favorite;
+import org.restaurantfinder.backend.model.FavoriteRequest;
 import org.restaurantfinder.backend.service.FavoriteService;
 
 import java.util.List;
@@ -26,8 +27,7 @@ class FavoriteControllerTest {
     void shouldAddFavorite() {
         FavoriteService favoriteService = mock(FavoriteService.class);
 
-        Favorite favorite = new Favorite(
-                null,
+        FavoriteRequest request = new FavoriteRequest(
                 "restaurant-123",
                 "Test Restaurant",
                 "Lister Meile 15, Hannover",
@@ -46,14 +46,14 @@ class FavoriteControllerTest {
                 9.750
         );
 
-        when(favoriteService.addFavorite(favorite))
+        when(favoriteService.addFavorite(any(Favorite.class)))
                 .thenReturn(savedFavorite);
 
         FavoriteController favoriteController =
                 new FavoriteController(favoriteService);
 
         Favorite result =
-                favoriteController.addFavorite(favorite);
+                favoriteController.addFavorite(request);
 
         assertEquals(savedFavorite, result);
     }

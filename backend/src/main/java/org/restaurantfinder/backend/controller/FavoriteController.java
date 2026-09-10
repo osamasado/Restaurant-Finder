@@ -1,6 +1,7 @@
 package org.restaurantfinder.backend.controller;
 
 import org.restaurantfinder.backend.model.Favorite;
+import org.restaurantfinder.backend.model.FavoriteRequest;
 import org.restaurantfinder.backend.service.FavoriteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,18 @@ public class FavoriteController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Favorite addFavorite(@RequestBody Favorite favorite) {
+    public Favorite addFavorite(@RequestBody FavoriteRequest request) {
+
+        Favorite favorite = new Favorite(
+                null,
+                request.restaurantId(),
+                request.name(),
+                request.address(),
+                request.cuisine(),
+                request.latitude(),
+                request.longitude()
+        );
+
         return favoriteService.addFavorite(favorite);
     }
 
