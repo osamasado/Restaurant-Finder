@@ -39,6 +39,8 @@ type RestaurantMapProps = {
     setSelectedRestaurant: (restaurant: Restaurant | null) => void;
 };
 
+type TransportMode = "walk" | "drive" | "bicycle";
+
 // MapContainer's `center` prop only applies once, on mount. When a search
 // resolves to a new location after the map is already showing, fly there.
 function RecenterMap({position}: Readonly<{ position: [number, number] }>) {
@@ -59,7 +61,10 @@ export default function RestaurantMap({
                                           setSelectedRestaurant
                                       }: Readonly<RestaurantMapProps>) {
 
-    const [walkingRoute, setWalkingRoute] = useState<Route | null>(null);
+    const [route, setRoute] = useState<Route | null>(null);
+    const [selectedMode, setSelectedMode] = useState<TransportMode>("walk");
+    const [isRouteLoading, setIsRouteLoading] = useState(false);
+    const [routeError, setRouteError] = useState<string | null>(null);
     const markerRefs = useRef<Map<string, L.Marker>>(new Map());
 
     useEffect(() => {
@@ -67,21 +72,31 @@ export default function RestaurantMap({
             return;
         }
 
-        getRoute(
-            userLocation.latitude,
-            userLocation.longitude,
-            selectedRestaurant.latitude,
-            selectedRestaurant.longitude,
-            "walk"
-        )
-            .then((route) => {
-                setWalkingRoute(route);
-            })
-            .catch((error) => {
-                console.error("Could not load route:", error);
-            });
+        const loadRoute = async () => {
+            setIsRouteLoading(true);
+            setRouteError(null);
 
-    }, [userLocation, selectedRestaurant]);
+            try {
+                const newRoute = await getRoute(
+                    userLocation.latitude,
+                    userLocation.longitude,
+                    selectedRestaurant.latitude,
+                    selectedRestaurant.longitude,
+                    selectedMode
+                );
+
+                setRoute(newRoute);
+            } catch (error) {
+                console.error("Could not load route:", error);
+                setRouteError("Could not load route. Please try again.");
+            } finally {
+                setIsRouteLoading(false);
+            }
+        };
+
+        void loadRoute();
+
+    }, [userLocation, selectedRestaurant, selectedMode]);
 
     const mapPosition: [number, number] = [
         userLocation.latitude,
@@ -96,7 +111,7 @@ export default function RestaurantMap({
         : mapPosition;
 
     const routePositions: [number, number][] =
-        walkingRoute?.coordinates?.map(([longitude, latitude]) => [
+        route?.coordinates?.map(([longitude, latitude]) => [
             latitude,
             longitude
         ]) ?? [];
@@ -178,38 +193,91 @@ export default function RestaurantMap({
                     </Marker>
                 ))}
 
-                {/* Walking route */}
+                {/* Selected route */}
                 {routePositions.length > 0 && (
                     <Polyline positions={routePositions}/>
                 )}
             </MapContainer>
 
-            {walkingRoute && (
+            {selectedRestaurant && (
                 <div className="mx-auto mt-4 max-w-md px-4">
+
+                    <div className="mb-3 flex justify-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setSelectedMode("walk")}
+                            className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                                selectedMode === "walk"
+                                    ? "bg-slate-900 text-white"
+                                    : "bg-slate-100 text-slate-700"
+                            }`}
+                        >
+                            🚶 Walk
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setSelectedMode("drive")}
+                            className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                                selectedMode === "drive"
+                                    ? "bg-slate-900 text-white"
+                                    : "bg-slate-100 text-slate-700"
+                            }`}
+                        >
+                            🚗 Drive
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setSelectedMode("bicycle")}
+                            className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                                selectedMode === "bicycle"
+                                    ? "bg-slate-900 text-white"
+                                    : "bg-slate-100 text-slate-700"
+                            }`}
+                        >
+                            🚲 Bicycle
+                        </button>
+                    </div>
+
                     <div className="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                         <button
                             type="button"
                             onClick={() => {
-                                setWalkingRoute(null);
+                                setRoute(null);
                                 setSelectedRestaurant(null);
                             }}
-                            aria-label="Close walking route"
+                            aria-label="Close route"
                             className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             <X className="size-4"/>
                         </button>
 
                         <p className="pr-6 font-semibold text-slate-900">
-                            🚶 Walking Route
+                            {selectedMode === "walk" && "🚶 Walking Route"}
+                            {selectedMode === "drive" && "🚗 Driving Route"}
+                            {selectedMode === "bicycle" && "🚲 Bicycle Route"}
                         </p>
 
-                        <p className="mt-2 text-sm text-slate-600">
-                            Distance: {Math.round(walkingRoute.distance)} m
-                        </p>
+                        {routeError ? (
+                            <p className="mt-2 text-sm text-red-600">
+                                {routeError}
+                            </p>
+                        ) : isRouteLoading ? (
+                            <p className="mt-2 text-sm text-slate-500">
+                                Loading route...
+                            </p>
+                        ) : route ? (
+                            <>
+                                <p className="mt-2 text-sm text-slate-600">
+                                    Distance: {Math.round(route.distance)} m
+                                </p>
 
-                        <p className="text-sm text-slate-600">
-                            Estimated time: {Math.round(walkingRoute.duration / 60)} min
-                        </p>
+                                <p className="text-sm text-slate-600">
+                                    Estimated time: {Math.round(route.duration / 60)} min
+                                </p>
+                            </>
+                        ) : null}
                     </div>
                 </div>
             )}
