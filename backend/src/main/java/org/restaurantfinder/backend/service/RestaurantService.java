@@ -5,6 +5,7 @@ import org.restaurantfinder.backend.model.GeoapifyPlacesResponse;
 import org.restaurantfinder.backend.model.GeocodedLocation;
 import org.restaurantfinder.backend.model.Restaurant;
 import org.restaurantfinder.backend.model.RestaurantSearchResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -18,12 +19,10 @@ public class RestaurantService {
     private final String apiKey;
     private final GeocodingService geocodingService;
 
-    public RestaurantService(RestClient.Builder restClientBuilder,
+    public RestaurantService(@Qualifier("placesRestClient") RestClient restClient,
                               @Value("${geoapify.app.key}") String apiKey,
                               GeocodingService geocodingService) {
-        this.restClient = restClientBuilder
-                .baseUrl("https://api.geoapify.com/v2/places")
-                .build();
+        this.restClient = restClient;
         this.apiKey = apiKey;
         this.geocodingService = geocodingService;
     }

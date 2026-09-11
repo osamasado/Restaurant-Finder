@@ -7,11 +7,13 @@ import org.restaurantfinder.backend.model.Restaurant;
 import org.restaurantfinder.backend.model.RestaurantSearchResponse;
 import org.restaurantfinder.backend.service.GeocodingService;
 import org.restaurantfinder.backend.service.RestaurantService;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,5 +68,20 @@ class RestaurantControllerTest {
         List<AddressSuggestion> actual = restaurantController.getAddressSuggestions("Alexander");
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldReturnEmptySuggestionsWhenGeoapifyTimesOut() {
+        RestaurantService restaurantService = mock(RestaurantService.class);
+        GeocodingService geocodingService = mock(GeocodingService.class);
+
+        when(geocodingService.autocomplete("Alexander"))
+                .thenThrow(new ResourceAccessException("Request cancelled"));
+
+        RestaurantController restaurantController = new RestaurantController(restaurantService, geocodingService);
+
+        List<AddressSuggestion> actual = restaurantController.getAddressSuggestions("Alexander");
+
+        assertTrue(actual.isEmpty());
     }
 }

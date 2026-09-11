@@ -26,10 +26,12 @@ export default function SearchBar({
 
     const debouncedQuery = useDebounce(query.trim(), 400);
 
-    const {data: suggestions = []} = useQuery({
+    const {data: suggestions = [], isFetching: isFetchingSuggestions} = useQuery({
         queryKey: ["addressSuggestions", debouncedQuery],
         queryFn: () => getAddressSuggestions(debouncedQuery),
         enabled: debouncedQuery.length >= 3,
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
     });
 
     // Close the suggestions dropdown when clicking anywhere outside the search bar.
@@ -73,7 +75,11 @@ export default function SearchBar({
         <div ref={containerRef} className="relative w-full max-w-md">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
                 <div className="relative flex-1">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"/>
+                    {isFetchingSuggestions ? (
+                        <Loader2 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-slate-400"/>
+                    ) : (
+                        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"/>
+                    )}
                     <input
                         type="text"
                         value={query}

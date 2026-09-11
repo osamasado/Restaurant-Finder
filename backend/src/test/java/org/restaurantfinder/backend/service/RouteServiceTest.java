@@ -17,7 +17,7 @@ class RouteServiceTest {
     void shouldCreateRouteService() {
         RestClient.Builder builder = RestClient.builder();
 
-        RouteService routeService = new RouteService(builder, "test-key");
+        RouteService routeService = new RouteService(builder.baseUrl("http://localhost").build(), "test-key");
 
         assertNotNull(routeService);
     }
@@ -78,7 +78,7 @@ class RouteServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        RouteService routeService = new RouteService(builder, "test-key");
+        RouteService routeService = new RouteService(builder.baseUrl("http://localhost").build(), "test-key");
 
         Route route = routeService.getRoute(
                 52.3809821,
@@ -108,7 +108,7 @@ class RouteServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        RouteService routeService = new RouteService(builder, "test-key");
+        RouteService routeService = new RouteService(builder.baseUrl("http://localhost").build(), "test-key");
 
         Route route = routeService.getRoute(
                 52.3809821,

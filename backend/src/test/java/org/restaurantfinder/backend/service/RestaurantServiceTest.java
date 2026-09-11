@@ -24,7 +24,7 @@ class RestaurantServiceTest {
     void shouldCreateRestaurantService() {
         RestClient.Builder builder = RestClient.builder();
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
+        RestaurantService restaurantService = new RestaurantService(builder.baseUrl("http://localhost").build(), "test-key", mock(GeocodingService.class));
 
         assertNotNull(restaurantService);
     }
@@ -70,7 +70,7 @@ class RestaurantServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
+        RestaurantService restaurantService = new RestaurantService(builder.baseUrl("http://localhost").build(), "test-key", mock(GeocodingService.class));
 
         List<Restaurant> restaurants = restaurantService.getRestaurants(13.404954, 52.520008, 2000);
 
@@ -120,7 +120,7 @@ class RestaurantServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
+        RestaurantService restaurantService = new RestaurantService(builder.baseUrl("http://localhost").build(), "test-key", mock(GeocodingService.class));
 
         List<Restaurant> restaurants = restaurantService.getRestaurants(13.404954, 52.520008, 2000);
 
@@ -150,7 +150,7 @@ class RestaurantServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
+        RestaurantService restaurantService = new RestaurantService(builder.baseUrl("http://localhost").build(), "test-key", mock(GeocodingService.class));
 
         List<Restaurant> restaurants = restaurantService.getRestaurants(13.404954, 52.520008, 2000);
 
@@ -167,7 +167,7 @@ class RestaurantServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key", mock(GeocodingService.class));
+        RestaurantService restaurantService = new RestaurantService(builder.baseUrl("http://localhost").build(), "test-key", mock(GeocodingService.class));
 
         List<Restaurant> restaurants = restaurantService.getRestaurants(13.404954, 52.520008, 2000);
 
@@ -206,7 +206,7 @@ class RestaurantServiceTest {
         GeocodedLocation location = GeocodedLocation.builder().lat(52.520008).lon(13.404954).build();
         when(geocodingService.geocode("Alexanderplatz, Berlin")).thenReturn(Optional.of(location));
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key", geocodingService);
+        RestaurantService restaurantService = new RestaurantService(builder.baseUrl("http://localhost").build(), "test-key", geocodingService);
 
         RestaurantSearchResponse response = restaurantService.searchByAddress("Alexanderplatz, Berlin", 2000);
 
@@ -222,7 +222,7 @@ class RestaurantServiceTest {
         GeocodingService geocodingService = mock(GeocodingService.class);
         when(geocodingService.geocode("nonexistent address")).thenReturn(Optional.empty());
 
-        RestaurantService restaurantService = new RestaurantService(builder, "test-key", geocodingService);
+        RestaurantService restaurantService = new RestaurantService(builder.baseUrl("http://localhost").build(), "test-key", geocodingService);
 
         assertThrows(AddressNotFoundException.class,
                 () -> restaurantService.searchByAddress("nonexistent address", 2000));

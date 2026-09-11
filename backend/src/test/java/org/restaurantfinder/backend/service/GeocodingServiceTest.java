@@ -40,7 +40,7 @@ class GeocodingServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        GeocodingService geocodingService = new GeocodingService(builder, "test-key");
+        GeocodingService geocodingService = new GeocodingService(builder.baseUrl("http://localhost").build(), "test-key");
 
         Optional<GeocodedLocation> location = geocodingService.geocode("Alexanderplatz, Berlin");
 
@@ -61,7 +61,7 @@ class GeocodingServiceTest {
                         { "features": [] }
                         """, MediaType.APPLICATION_JSON));
 
-        GeocodingService geocodingService = new GeocodingService(builder, "test-key");
+        GeocodingService geocodingService = new GeocodingService(builder.baseUrl("http://localhost").build(), "test-key");
 
         Optional<GeocodedLocation> location = geocodingService.geocode("asdkjasdlkj123");
 
@@ -93,7 +93,7 @@ class GeocodingServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        GeocodingService geocodingService = new GeocodingService(builder, "test-key");
+        GeocodingService geocodingService = new GeocodingService(builder.baseUrl("http://localhost").build(), "test-key");
 
         Optional<GeocodedLocation> location = geocodingService.geocode("74629 Pfedelbach, Germany");
 
@@ -125,7 +125,7 @@ class GeocodingServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        GeocodingService geocodingService = new GeocodingService(builder, "test-key");
+        GeocodingService geocodingService = new GeocodingService(builder.baseUrl("http://localhost").build(), "test-key");
 
         Optional<GeocodedLocation> location = geocodingService.geocode("Pfedelbach");
 
@@ -165,7 +165,7 @@ class GeocodingServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        GeocodingService geocodingService = new GeocodingService(builder, "test-key");
+        GeocodingService geocodingService = new GeocodingService(builder.baseUrl("http://localhost").build(), "test-key");
 
         List<AddressSuggestion> suggestions = geocodingService.autocomplete("Alexander");
 
@@ -207,7 +207,7 @@ class GeocodingServiceTest {
         server.expect(request -> {})
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        GeocodingService geocodingService = new GeocodingService(builder, "test-key");
+        GeocodingService geocodingService = new GeocodingService(builder.baseUrl("http://localhost").build(), "test-key");
 
         List<AddressSuggestion> suggestions = geocodingService.autocomplete("Pfedelbach");
 

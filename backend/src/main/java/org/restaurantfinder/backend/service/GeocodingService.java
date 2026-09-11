@@ -3,6 +3,7 @@ package org.restaurantfinder.backend.service;
 import org.restaurantfinder.backend.model.AddressSuggestion;
 import org.restaurantfinder.backend.model.GeoapifyGeocodingResponse;
 import org.restaurantfinder.backend.model.GeocodedLocation;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -17,19 +18,15 @@ public class GeocodingService {
 
     private final RestClient restClient;
     private final String apiKey;
-    private static final String GEOAPIFY_GEOCODING_URL =
-            "https://api.geoapify.com/v1/geocode";
 
     // Geoapify's result_type for a match that only narrowed down to an administrative
     // area or postal code, not an actual place - too imprecise to search "near".
     private static final Set<String> VAGUE_RESULT_TYPES =
             Set.of("country", "state", "county", "city", "postcode");
 
-    public GeocodingService(RestClient.Builder restClientBuilder,
+    public GeocodingService(@Qualifier("geocodingRestClient") RestClient restClient,
                              @Value("${geoapify.app.key}") String apiKey) {
-        this.restClient = restClientBuilder
-                .baseUrl(GEOAPIFY_GEOCODING_URL)
-                .build();
+        this.restClient = restClient;
         this.apiKey = apiKey;
     }
 
