@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getCurrentUser, resolveBackendHost } from "../service/AuthService";
+import { getCurrentUser, readCsrfToken, resolveBackendHost } from "../service/AuthService";
 
 export function useAuth() {
     const query = useQuery({
@@ -15,9 +15,11 @@ export function useAuth() {
 
     const logout = useCallback(async () => {
         try {
+            const csrfToken = readCsrfToken();
             await fetch("/logout", {
                 method: "POST",
                 credentials: "include",
+                headers: csrfToken ? { "X-XSRF-TOKEN": csrfToken } : undefined,
             });
         } finally {
             window.location.href = "/";

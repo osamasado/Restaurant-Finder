@@ -11,3 +11,8 @@ export function resolveBackendHost(): string {
         ? "http://localhost:8080"
         : window.location.origin;
 }
+
+export function readCsrfToken(): string | null {
+    const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+    return match ? decodeURIComponent(match[1]) : null;
+}
