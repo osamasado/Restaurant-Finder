@@ -29,7 +29,10 @@ public class SecurityConfig {
                 )
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "/logout").permitAll()
+                        .requestMatchers(
+                                "/", "/index.html", "/assets/**", "/favicon.svg", "/icons.svg",
+                                "/oauth2/**", "/login/**", "/logout"
+                        ).permitAll()
                         .requestMatchers("/api/auth").authenticated()
                         .requestMatchers("/api/favorites").authenticated()
                         .requestMatchers("/api/restaurants").permitAll()
