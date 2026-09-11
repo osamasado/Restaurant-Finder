@@ -1,7 +1,9 @@
 import ViewToggle from "./ViewToggle.tsx";
 import RadiusSlider from "./RadiusSlider.tsx";
 import SearchBar from "./SearchBar.tsx";
+import AuthButton from "./AuthButton.tsx";
 import type {ViewMode} from "../types/ViewMode.ts";
+import type {User} from "../types/User.ts";
 
 type HeaderProps = {
     view: ViewMode;
@@ -15,6 +17,11 @@ type HeaderProps = {
     isSearchActive: boolean;
     searchError: string | null;
     onClearSearch: () => void;
+    authenticated: boolean;
+    user?: User;
+    isAuthLoading: boolean;
+    onLogin: () => void;
+    onLogout: () => void;
 }
 
 export default function Header({
@@ -28,15 +35,30 @@ export default function Header({
     isSearching,
     isSearchActive,
     searchError,
-    onClearSearch
+    onClearSearch,
+    authenticated,
+    user,
+    isAuthLoading,
+    onLogin,
+    onLogout
 }: Readonly<HeaderProps>) {
     return (
         <header className="bg-slate-900 px-6 py-8 text-white sm:py-12">
-            <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 text-center">
+            <div className="mx-auto mb-6 flex max-w-5xl items-center justify-between sm:mb-8">
                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                     Restaurant Finder
                 </p>
 
+                <AuthButton
+                    authenticated={authenticated}
+                    user={user}
+                    isLoading={isAuthLoading}
+                    onLogin={onLogin}
+                    onLogout={onLogout}
+                />
+            </div>
+
+            <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 text-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
                         Find great restaurants nearby

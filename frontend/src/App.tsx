@@ -11,6 +11,7 @@ import {getNearbyRestaurants, searchRestaurantsByAddress} from "./service/Restau
 import ErrorState from "./components/ErrorState.tsx";
 import LoadingState from "./components/LoadingState.tsx";
 import EmptyState from "./components/EmptyState.tsx";
+import {useAuth} from "./hooks/useAuth.ts";
 
 function getErrorMessage(error: unknown, fallback: string): string {
     if (error && typeof error === "object" && "response" in error) {
@@ -30,6 +31,8 @@ function App() {
     const [view, setView] = useState<ViewMode>("map");
     const [radius, setRadius] = useState<number>(2000);
     const [searchAddress, setSearchAddress] = useState<string | null>(null);
+
+    const auth = useAuth();
 
     const fetchLocation = useCallback(() => {
         navigator.geolocation.getCurrentPosition(
@@ -117,6 +120,11 @@ function App() {
                     ? getErrorMessage(searchQuery.error, "We couldn't find that address. Try a different search.")
                     : null}
                 onClearSearch={handleClearSearch}
+                authenticated={auth.authenticated}
+                user={auth.user}
+                isAuthLoading={auth.isLoading}
+                onLogin={auth.login}
+                onLogout={auth.logout}
             />
 
             <main className="flex-1">
